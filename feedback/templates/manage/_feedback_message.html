@@ -22,21 +22,21 @@
 						{{ field.label|default:field.name }}
 						{% if field.help_text %}
 							<span rel="tooltip"
-								data-toggle="tooltip"
-								data-trigger="hover click"
-								data-placement="bottom"
-								data-html="true"
+								data-bs-toggle="tooltip"
+								data-bs-trigger="hover click"
+								data-bs-placement="bottom"
+								data-bs-html="true"
 								title="{{ field.help_text }}"
 								>
-								<span class="glyphicon glyphicon-info-sign"></span>
+								<span class="bi bi-info-circle"></span>
 							</span>
 						{% endif %}
 						{% if not field.field.required %}
 							<span rel="tooltip"
-								data-toggle="tooltip"
-								data-trigger="hover click"
-								data-placement="bottom"
-								data-html="true"
+								data-bs-toggle="tooltip"
+								data-bs-trigger="hover click"
+								data-bs-placement="bottom"
+								data-bs-html="true"
 								title="{% trans 'This field was <b>not</b> required' %}"
 								>
 								<span class="label label-info">{% trans "optional" %}</span>
@@ -65,13 +65,13 @@
 			<div class="btn-group btn-group-xs" role="group">
 				<a
 					class="btn btn-primary"
-					data-toggle="tooltip"
-					data-trigger="hover"
-					data-placement="bottom"
+					data-bs-toggle="tooltip"
+					data-bs-trigger="hover"
+					data-bs-placement="bottom"
 					title="{% trans 'Show submission in A+' %}"
 					href="{{ feedback.submission_html_url }}"
 					>
-					<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+					<span class="bi bi-file" aria-hidden="true"></span>
 					A+
 				</a>
 			</div>

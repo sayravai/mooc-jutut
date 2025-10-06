@@ -15,10 +15,10 @@
 			data-updateurl="{{ status_url|default:request.get_full_path }}"
 			data-code="{{ upl.code }}"
 			{% if upl.code %}
-				data-toggle="tooltip"
-				data-trigger="hover"
-				data-placement="top"
-				data-html="true"
+				data-bs-toggle="tooltip"
+				data-bs-trigger="hover"
+				data-bs-placement="top"
+				data-bs-html="true"
 				title="{% blocktrans with count=upl.attempts when=upl.when|date:'Y-m-d H:i:s' code=upl.code %}Upload is <b>not</b> ok.<br>Tried {{count}} times.<br>Last tried {{when}} with status {{code}}.{% endblocktrans %}"
 			{% endif %}
 			{{ state|on_state:"default" }}

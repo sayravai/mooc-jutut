@@ -3,7 +3,7 @@
   Template for bootstrap glyph
 -#}
 {% macro glyph(name, arialabel=none) -%}
-	<span class="glyphicon glyphicon-{{name}}"
+	<span class="bi bi-{{name}}"
 		{%- if arialabel-%}
 			aria-label="{{ arialabel }}"
 		{%- else -%}
