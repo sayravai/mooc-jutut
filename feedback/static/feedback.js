@@ -691,15 +691,27 @@ async function fetchBtnUrlContent(btn, errorClass) {
 
 
 $(function() {
-  $('[data-bs-toggle="popover"]').popover();
+  // Initialize any static popovers declared via data attributes (Bootstrap 5 only)
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+    if (!bootstrap.Popover.getInstance(el)) new bootstrap.Popover(el);
+  });
 
   const opts = {
     html: true,
-    placement: 'bottom',
+    placement: 'bottom', // preferred placement
     trigger: 'focus hover',
     viewport: { selector: 'body', padding: 20 },
     // to reduce issue with scrolling at bottom of page on mobile
     container: 'body',
+    // Safer popper configuration: allow only top as a fallback (never left/right)
+    popperConfig: (defaultCfg) => ({
+      ...defaultCfg,
+      modifiers: defaultCfg.modifiers.map(m =>
+        m.name === 'flip'
+          ? { ...m, options: { ...m.options, fallbackPlacements: ['top'] } }
+          : m
+      ),
+    }),
   };
 
   /* Popovers stay open the first time they are triggered due to manual "show".
@@ -708,7 +720,8 @@ $(function() {
     ['focusin', 'click'].forEach((evtType) => {
       document.addEventListener(evtType, e => {
         if (!btn.contains(e.target)) {
-          $(btn).popover('hide');
+          const inst = bootstrap.Popover.getInstance(btn);
+          if (inst) inst.hide();
         };
       },
       {once: true});
@@ -718,37 +731,15 @@ $(function() {
   /* Replace default popover with fetched discussions preview */
   $('.student-conv-prev-btn').one('show.bs.popover', function(e) {
     const btn = e.target;
-    // Bootstrap 3 used 'destroy'; Bootstrap 4/5 use 'dispose'. Support both safely.
-    const existingPopover = (typeof bootstrap !== 'undefined' && bootstrap.Popover) ? bootstrap.Popover.getInstance(btn) : null;
-    if (existingPopover) {
-      existingPopover.dispose();
-    } else if ($(btn).data('bs.popover')) { // jQuery plugin instance fallback
-      try { $(btn).popover('dispose'); } catch(_) { try { $(btn).popover('destroy'); } catch(__) {} }
-    }
-    // If a tooltip was previously bound (e.g. element had both), dispose it to prevent conflict
-    if (window.bootstrap && bootstrap.Tooltip) {
-      const tt = bootstrap.Tooltip.getInstance(btn);
-      if (tt) tt.dispose();
-    } else if ($(btn).data('bs.tooltip')) {
-      try { $(btn).tooltip('destroy'); } catch(_) {}
-    }
+    const existingPopover = bootstrap.Popover.getInstance(btn);
+    if (existingPopover) existingPopover.dispose();
+    const tt = bootstrap.Tooltip.getInstance(btn); // dispose tooltip if present
+    if (tt) tt.dispose();
     studentDiscussionPreview(btn)
       .then(function(newContent) {
-        const popOpts = {
-          ...opts,
-          content: newContent,
-          placement: (popover, trg) => {
-            if ($('.student-conv-prev-btn').last().is(trg)) return 'bottom auto';
-            return 'bottom';
-          },
-        };
-        if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
-          const instance = new bootstrap.Popover(btn, popOpts);
-          instance.show();
-        } else {
-          // Fallback to jQuery plugin (older Bootstrap)
-          $(btn).popover(popOpts).popover('show');
-        }
+        const popOpts = { ...opts, content: newContent };
+        const instance = new bootstrap.Popover(btn, popOpts);
+        instance.show();
         hideOnFocusOutside(btn);
       });
   });
@@ -756,18 +747,9 @@ $(function() {
   /* Replace default popover with points summary */
   $('.display-points-btn').one('show.bs.popover', function(e) {
     const btn = e.target;
-    const existingPopover = (typeof bootstrap !== 'undefined' && bootstrap.Popover) ? bootstrap.Popover.getInstance(btn) : null;
-    if (existingPopover) {
-      existingPopover.dispose();
-    } else if ($(btn).data('bs.popover')) {
-      try { $(btn).popover('dispose'); } catch(_) { try { $(btn).popover('destroy'); } catch(__) {} }
-    }
-    if (window.bootstrap && bootstrap.Tooltip) {
-      const tt = bootstrap.Tooltip.getInstance(btn);
-      if (tt) tt.dispose();
-    } else if ($(btn).data('bs.tooltip')) {
-      try { $(btn).tooltip('destroy'); } catch(_) {}
-    }
+    const existingPopover = bootstrap.Popover.getInstance(btn);
+    if (existingPopover) existingPopover.dispose();
+    const tt = bootstrap.Tooltip.getInstance(btn); if (tt) tt.dispose();
     fetchBtnUrlContent(btn, 'points-display')
       .then(function(newContent) {
         const popOpts = {
@@ -775,48 +757,27 @@ $(function() {
           content: newContent,
           viewport: {selector: '.feedback-response-panel', padding: 6 },
         };
-        if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
-          const instance = new bootstrap.Popover(btn, popOpts);
-          instance.show();
-        } else {
-          $(btn).popover(popOpts).popover('show');
-        }
+        const instance = new bootstrap.Popover(btn, popOpts);
+        instance.show();
         hideOnFocusOutside(btn);
-        $('.points-display [data-bs-toggle="tooltip"]').tooltip();
+        // Initialize any tooltips that appeared within loaded content
+        $('.points-display [data-bs-toggle="tooltip"]').each(function() {
+          if (!bootstrap.Tooltip.getInstance(this)) new bootstrap.Tooltip(this);
+        });
       });
   });
 
   /* Replace default popover with response to background questionnaire */
   $('.background-btn').one('show.bs.popover', function(e) {
     const btn = e.target;
-    const existingPopover = (typeof bootstrap !== 'undefined' && bootstrap.Popover) ? bootstrap.Popover.getInstance(btn) : null;
-    if (existingPopover) {
-      existingPopover.dispose();
-    } else if ($(btn).data('bs.popover')) {
-      try { $(btn).popover('dispose'); } catch(_) { try { $(btn).popover('destroy'); } catch(__) {} }
-    }
-    if (window.bootstrap && bootstrap.Tooltip) {
-      const tt = bootstrap.Tooltip.getInstance(btn);
-      if (tt) tt.dispose();
-    } else if ($(btn).data('bs.tooltip')) {
-      try { $(btn).tooltip('destroy'); } catch(_) {}
-    }
+    const existingPopover = bootstrap.Popover.getInstance(btn);
+    if (existingPopover) existingPopover.dispose();
+    const tt = bootstrap.Tooltip.getInstance(btn); if (tt) tt.dispose();
     fetchBtnUrlContent(btn, 'background-display')
       .then(function(newContent) {
-        const popOpts = {
-          ...opts,
-          content: newContent,
-          placement: (popover, trg) => {
-            if ($('.background-btn').last().is(trg)) return 'bottom auto';
-            return 'bottom';
-          },
-        };
-        if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
-          const instance = new bootstrap.Popover(btn, popOpts);
-          instance.show();
-        } else {
-          $(btn).popover(popOpts).popover('show');
-        }
+        const popOpts = { ...opts, content: newContent };
+        const instance = new bootstrap.Popover(btn, popOpts);
+        instance.show();
         hideOnFocusOutside(btn);
       });
   });

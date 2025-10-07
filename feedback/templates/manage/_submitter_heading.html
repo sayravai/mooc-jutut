@@ -29,7 +29,7 @@
 	</div>
 	<div class="btn-toolbar" role="toolbar" aria-label="{% translate 'Toolbar of buttons related to student' %}">
 		<div class="btn-group" role="group" aria-label="{% translate 'Group of buttons for viewing conversations with student' %}">
-			<a class="btn btn-xs hover-btn"
+			<a class="btn btn-sm hover-btn"
 				data-bs-toggle="tooltip"
 				data-bs-trigger="hover"
 				data-bs-placement="top"
@@ -37,11 +37,12 @@
 				href="{{ conv.all_feedback_for_student_url }}&contains_text=on">
 				<span class="bi bi-filter" aria-hidden="true"></span>
 			</a>
-			<a class="btn btn-xs hover-btn student-conv-prev-btn"
+			<a class="btn btn-sm hover-btn student-conv-prev-btn"
 				tabindex="0"
 				role="button"
 				data-bs-toggle="popover"
 				data-bs-trigger="focus hover"
+				data-bs-placement="bottom"
 				data-title="{% blocktranslate trimmed with name=user.full_name %}
 					Conversations with {{ name }}
 				{% endblocktranslate %}"
@@ -54,11 +55,12 @@
 		</div>
 		<div class="btn-group fb-context-btn-group" role="group" aria-label="{% translate 'Group of buttons providing background context' %}">
 			{% if conv.show_background %}
-				<a class="btn btn-xs hover-btn background-btn"
+				<a class="btn btn-sm hover-btn background-btn"
 					tabindex="0"
 					role="button"
 					data-bs-toggle="popover"
 					data-bs-trigger="focus hover"
+					data-bs-placement="bottom"
 					title="{% blocktranslate trimmed with name=user.full_name %}
 						Background questionnaire for {{ name }}
 					{% endblocktranslate %}"
@@ -69,11 +71,12 @@
 					{% trans 'Background' %}
 				</a>
 			{% endif %}
-			<a class="btn btn-xs hover-btn display-points-btn"
+			<a class="btn btn-sm hover-btn display-points-btn"
 				tabindex="0"
 				role="button"
 				data-bs-toggle="popover"
 				data-bs-trigger="focus hover"
+				data-bs-placement="bottom"
 				title="{% blocktranslate trimmed with name=user.full_name %}
 					Points for {{ name }}
 				{% endblocktranslate %}"

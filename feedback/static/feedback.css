@@ -269,7 +269,7 @@ input[type="checkbox"].combosearch + label {
 .btn-group > .btn ~ .btn {
 	margin-left: -1px;
 }
-.feedback-response-panel .btn-group > .btn.btn-xs:not(:has( ~ .btn)) {
+.feedback-response-panel .btn-group > .btn.btn-sm:not(:has( ~ .btn)) {
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 }
