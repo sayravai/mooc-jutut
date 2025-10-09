@@ -40,7 +40,7 @@
 	{%- else -%}
 		{% set sr_text = _("Previous responses") %}
 	{%- endif -%}
-	<div class="history-well mb-2 p-2 border rounded bg-light">
+	<div class="history-well mb-2 p-2 border rounded bg-body-secondary">
 		<span class="visually-hidden">{{ sr_text }}</span>
 		<ul class="list-group nav" style="margin-bottom: 0;">
 			{% if older_count > 2 -%}
@@ -144,11 +144,11 @@
 		</div>
 
 		<div class="mb-3">
-			<div class="btn-toolbar">
+			<div class="btn-toolbar gap-2">
 				<input
 					type="submit"
 					value="{{ _('Submit') }}"
-					class="btn btn-primary aplus-submit">
+					class="btn btn-primary aplus-submit mr-2">
 				<input
 					type="reset"
 					value="{{ _('Reset changes') }}"
@@ -184,13 +184,13 @@
 			// inject styles
 			if ($('#jutut-v2').length==0)
 				$('<style id="jutut-v2"></style>').appendTo(document.head).text(
-					".jutut-exercise.jutut-v2 .history-well { padding: 6px; } " +
+					".jutut-exercise.jutut-v2 . { padding: 6px; } " +
 					".jutut-exercise.jutut-v2 li.initially-hidden { display: none; } " +
 					".jutut-exercise.jutut-v2 .show-more { margin: 0 0 -6px; padding: 0; text-align: center; cursor: pointer; } " +
 					".jutut-exercise.jutut-v2 li { margin: 3px 0; border-radius: 4px; } " +
 					".jutut-exercise.jutut-v2 li .text { white-space: pre-wrap; } " +
-					".jutut-exercise.jutut-v2 li.staff { margin-left: 15%; padding-left: 32px; color: #333; position: relative; } " +
-					".jutut-exercise.jutut-v2 li.staff .bi { position: absolute; top: 12px; left: 12px; color: #5d5d5d; } " +
+					".jutut-exercise.jutut-v2 li.staff { margin-left: 15%; padding-left: 32px; position: relative; } " +
+					".jutut-exercise.jutut-v2 li.staff .bi { position: absolute; left: 12px; } " +
 					".jutut-exercise.jutut-v2 li.student { margin-right: 15%;} " +
 					".modal-content .jutut-exercise.jutut-v2 li.student:not(:has(~ .student)) { border: solid 2px #66afe9; } "
 				);
