@@ -89,9 +89,8 @@ input[type="checkbox"].combosearch + label {
 .fb-filter-field:has(> #id_feedbackfilter_flags) {
 	width: 100%;
 }
-#id_feedbackfilter_flags .segmented-select {
+#id_feedbackfilter_flags .btn-group {
 	margin: 0.4em 0px;
-	display: flex;
 }
 
 /* Displaying errors */
@@ -216,21 +215,11 @@ input[type="checkbox"].combosearch + label {
 	}
 }
 
-/* icons for extra filters toggle button */
-#filter-container #extra-filters-btn:before {
-	position: relative;
-	top: 0.1em;
-	margin-right: 0.3em;
-	display: inline-block;
-	font-family: 'Glyphicons Halflings';
-	line-height: 1;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	content: "\e259";
-}
-#filter-container.expanded #extra-filters-btn:before {
-	content: "\e260";
-}
+/* Extra filters toggle button icons (Bootstrap Icons) */
+#extra-filters-btn .bi { vertical-align: middle; margin-right: 0.25em; }
+#extra-filters-btn .bi-chevron-up { display: none; }
+#filter-container.expanded #extra-filters-btn .bi-chevron-down { display: none; }
+#filter-container.expanded #extra-filters-btn .bi-chevron-up { display: inline-block; }
 
 /* labels in panel headers and footers */
 .panel-heading .label,
@@ -238,26 +227,16 @@ input[type="checkbox"].combosearch + label {
 	font-size: 100%;
 }
 
-/* add selected mark for active radio replacement button */
-.buttons-for-radio button.active:before {
-	position: relative;
-	top: 1px;
-	display: inline-block;
-	font-family: 'Glyphicons Halflings';
-	font-style: normal;
-	font-weight: 400;
-	line-height: 1;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	content: "\e013";
-}
+/* Active radio replacement button icon (inline element injected in JS) */
+.buttons-for-radio button .active-icon { display: none; margin-right: 0.25em; }
+.buttons-for-radio button.active .active-icon { display: inline-block; }
 
 .hover-btn {
 	background: none;
 	border-color: rgba(150, 150, 150, 0.3);
 }
-.hover-btn > .glyphicon,
-.styling-btn-container .btn > .glyphicon {
+.hover-btn > .bi,
+.styling-btn-container .btn > .bi {
 	top: 03px
 }
 .hover-btn:hover {
@@ -428,17 +407,17 @@ input[type="checkbox"].combosearch + label {
 }
 
 @media (min-width: 992px) /* from bootstrap */ {
-	body.ok .feedback-message tr .glyphicon,
+	body.ok .feedback-message tr .bi,
 	body.ok .feedback-message tr .label {
 		opacity: 0.2;
 		transition: opacity 200ms linear;
 	}
-	body.ok .feedback-message tr:hover .glyphicon,
+	body.ok .feedback-message tr:hover .bi,
 	body.ok .feedback-message tr:hover .label {
 		opacity: 1;
 	}
 }
-body.ios .feedback-message tr .glyphicon {
+body.ios .feedback-message tr .bi {
 	display: none;
 }
 
@@ -463,24 +442,20 @@ body.ios .feedback-message tr .glyphicon {
 	font-size: 0.8em;
 	font-family: Arial, Helvetica, sans-serif;
 }
-.feedback-message > .panel-footer .timestamp:after {
+/* Timestamp toggle icons (Bootstrap Icons via inline <i> elements) */
+.feedback-message > .panel-footer .timestamp .bi {
 	position: relative;
 	top: 1px;
-	display: inline-block;
-	font-family: 'Glyphicons Halflings';
-	font-style: normal;
 	font-size: 11px;
-	font-weight: 400;
-	line-height: 0.7;
+	line-height: 1;
 	margin-left: 0.4em;
-	margin-right: 0.2em;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	content: "\e260";
+	margin-right: 0.15em; /* tighter than pseudo-element version */
 }
-.feedback-message > .panel-footer.collapsed .timestamp:after {
-	content: "\e259";
-}
+/* Show chevron-down when collapsed (can expand), chevron-up when expanded (can collapse) */
+.feedback-message > .panel-footer .timestamp .bi-chevron-down { display: inline-block; }
+.feedback-message > .panel-footer .timestamp .bi-chevron-up { display: none; }
+.feedback-message > .panel-footer:not(.collapsed) .timestamp .bi-chevron-down { display: none; }
+.feedback-message > .panel-footer:not(.collapsed) .timestamp .bi-chevron-up { display: inline-block; }
 
 .feedback-message > .panel-footer > .feedback-msg-bottom.in {
 	padding-left: 0.3em;
@@ -568,7 +543,7 @@ body.ios .feedback-message tr .glyphicon {
 		display: block;
 	}
 	.hidden-xs-response {
-		display: none;
+		display: block;
 	}
 }
 .popover.style-buttons .popover-content{

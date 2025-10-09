@@ -196,8 +196,12 @@ $(function() {
     var button = $(this);
     var radio = $(button.data('radio'));
     radio.prop('checked', true);
-    button.closest('.buttons-for-radio').find('.btn.active').removeClass('active');
+    const container = button.closest('.buttons-for-radio');
+    container.find('.btn.active').removeClass('active').find('.active-icon').remove();
     button.addClass('active');
+    if (!button.find('.active-icon').length) {
+      button.prepend('<i class="bi bi-check-lg active-icon" aria-hidden="true"></i>');
+    }
     button.closest('form').submit();
   }
   function replace_with_buttons() {
@@ -207,7 +211,7 @@ $(function() {
       '<div class="btn-group segmented" role="group">' +
       '<button type="button" class="btn btn-sm btn-success dropdown-toggle"' +
       ' data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
-      '<span class="caret"></span><span class="sr-only">Toggle Dropdown</span>' +
+      '<i class="bi bi-chevron-down" aria-hidden="true"></i><span class="visually-hidden">Toggle Dropdown</span>' +
       '</button>' +
       '<ul class="dropdown-menu"></ul>' +
       '</div></div>').next();
@@ -230,8 +234,9 @@ $(function() {
           dropdown.prepend($('<li></li>').append(button));
         }
         button.data('radio', radio_pure).on('click', on_submit_button);
-        if (radio.is(':checked'))
-          button.addClass('active');
+        if (radio.is(':checked')) {
+          button.addClass('active').prepend('<i class="bi bi-check-lg active-icon" aria-hidden="true"></i>');
+        }
       }
     });
     // hide original form-group
@@ -565,7 +570,7 @@ function toggleShowAll(event) {
     );
   let elems = this.parentElement.getElementsByClassName('only-expanded');
   for (let i = 0; i < elems.length; i++) {
-    elems[i].classList.toggle('in');
+    elems[i].classList.toggle('show');
   }
 }
 

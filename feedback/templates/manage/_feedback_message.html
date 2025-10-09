@@ -59,7 +59,12 @@
 		role="button" aria-expanded="false" tabindex=0
 		title="{% trans 'Show all feedback fields' %}"
 	>
-		<span class="timestamp">{{ feedback.timestamp|naturaltime }}</span>
+		<span class="timestamp">
+			{{ feedback.timestamp|naturaltime }}
+			<i class="bi bi-chevron-down" aria-hidden="true"></i>
+			<i class="bi bi-chevron-up" aria-hidden="true"></i>
+			<span class="visually-hidden">{% trans "Toggle feedback details" %}</span>
+		</span>
 	<!-- change collapse-functionality so that only the classes within the clicked message are toggled -->
 		<div class="feedback-msg-bottom only-expanded collapse">
 			<div class="btn-group btn-group-sm" role="group">

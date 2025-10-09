@@ -7,7 +7,7 @@
 			<span class="bi bi-menu-down float-end visible-xs"></span>
 		</p>
 	</div>
-	<div id="filter-panel" class="card-body collapse in">
+	<div id="filter-panel" class="card-body collapse show">
 		<form id="filter-form" role="form" action="{% url url_pattern course_id=course.id %}" method="GET" class="form-horizontal" autocomplete="off">
 			{% include "manage/filter_form.html" with form=feedback_filter.form %}
 		</form>

@@ -16,8 +16,8 @@
 -#}
 {% macro staff_response(message, index=0) -%}
 	{% if message %}
-		<li class="list-group-item list-group-item-info staff" style="{% if index > 2 %}display: none;{% endif %}">
-			{{ glyph("education", _("teacher")) }}
+		<li class="list-group-item list-group-item-info staff{% if index > 2 %} initially-hidden{% endif %}">
+			{{ glyph("mortarboard-fill", _("teacher")) }}
 			<span class="text">{{ message|safe }}</span>
 		</li>
 	{% endif %}
@@ -26,7 +26,7 @@
   Student message template
 -#}
 {% macro student_message(messages, f_key, index=0) -%}
-	<li class="list-group-item student" style="{% if index > 2 %}display: none;{% endif %}">
+	<li class="list-group-item student{% if index > 2 %} initially-hidden{% endif %}">
 		{%- for key, text in messages -%}
 			{% if key == f_key -%}
 				<span class="text">{{ text }}</span>
@@ -40,12 +40,12 @@
 	{%- else -%}
 		{% set sr_text = _("Previous responses") %}
 	{%- endif -%}
-	<div class="well" style="margin-bottom: 6px;">
-		<span class="sr-only">{{ sr_text }}</span>
+	<div class="history-well mb-2 p-2 border rounded bg-light">
+		<span class="visually-hidden">{{ sr_text }}</span>
 		<ul class="list-group nav" style="margin-bottom: 0;">
 			{% if older_count > 2 -%}
 				<li class="show-more">
-					{{ glyph("menu-up") }} {{ _("show more") }} {{ glyph("menu-up") }}
+					{{ glyph("chevron-up") }} {{ _("show more") }} {{ glyph("chevron-down") }}
 				</li>
 			{%- endif %}
 
@@ -68,6 +68,23 @@
 	</div>
 {%- endmacro -%}
 {#
+	Generic field renderer for Bootstrap 5 (replaces |bootstrap and |bootstrap_classes filters from django-bootstrap-form)
+-#}
+{% macro render_field(field) -%}
+	<div class="mb-3">
+		{%- if field.auto_id and field.label -%}
+			<label class="form-label {% if field.field.required %}{{ form.required_css_class or 'required' }}{% endif %}" for="{{ field.auto_id }}">{{ field.label }}</label>
+		{%- endif -%}
+		{{ field }}
+		{%- if field.help_text -%}
+			<div class="form-text">{{ field.help_text|safe }}</div>
+		{%- endif -%}
+		{%- for error in field.errors -%}
+			<div class="invalid-feedback d-block">{{ error }}</div>
+		{%- endfor -%}
+	</div>
+{%- endmacro -%}
+{#
   Main block
 -#}
 <div class="jutut-exercise jutut-v2" lang="{{ get_current_language() }}">
@@ -78,51 +95,55 @@
 			{%- if form is has_textfields -%}
 
 				{%- if form.non_field_errors() -%}
-					<div class="alert alert-danger">
-						<a class="close" data-dismiss="alert">&times;</a>
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
 						{%- for non_field_error in form.non_field_errors() -%}
 							{{ non_field_error }}
 						{%- endfor -%}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ _('Close') }}"></button>
 					</div>
 				{%- endif -%}
 
 				{%- for field in form -%}
 					{%- if field.is_text -%}
-						<div class="form-group">
+						<div class="mb-3">
 							<div class="{{ field.css_classes() }}">
 								{%- if field.auto_id and field.label -%}
-									<label class="control-label {% if field.field.required %}{{ form.required_css_class or 'required' }}{% endif %}" for="{{ field.auto_id }}">{{ field.label }}</label>
+									<label class="form-label {% if field.field.required %}{{ form.required_css_class or 'required' }}{% endif %}" for="{{ field.auto_id }}">{{ field.label }}</label>
 								{%- endif -%}
 								{%- if field.help_text -%}
-									<div class="help-block">
+									<div class="form-text">
 										{{ field.help_text|safe }}
 									</div>
 								{%- endif -%}
 								{#- Old versions and teacher responses (if main text feedback) -#}
 								{{ well(older_count, field is primary_textfeedback, field.name) }}
-								{{- field|bootstrap_classes -}}
+								{{ field }}
 								{%- for error in field.errors -%}
-									<span class="help-block {{ form.error_css_class or 'error-msg' }}">{{ error }}</span>
+									<div class="invalid-feedback d-block">{{ error }}</div>
 								{%- endfor -%}
 							</div>
 						</div>
 					{%- else -%}
-						{{ field|bootstrap }}
+						{{ render_field(field) }}
 					{%- endif -%}
 				{%- endfor -%}
 			{%- else -%} {# render possible teacher responses even though there isn't text feedback -#}
 				{{ well(older_count) }}
-				{{ form|bootstrap }}
+				{%- for field in form -%}
+					{{ render_field(field) }}
+				{%- endfor -%}
 			{%- endif -%}
 		{%- else -%}
-			{{ form|bootstrap }}
+			{%- for field in form -%}
+				{{ render_field(field) }}
+			{%- endfor -%}
 		{%- endif -%}
 
 		<div class="only-when-edited alert alert-warning" style="display: none;">
 			{{ _("This feedback has unsaved changes!") }}
 		</div>
 
-		<div class="form-group">
+		<div class="mb-3">
 			<div class="btn-toolbar">
 				<input
 					type="submit"
@@ -140,12 +161,12 @@
 	<script>
 		(function($) {
 			const f = $('#{{ form_id }}');
-			{# implement show more #}
-			const c = f.find('.well'), m = c.find('.show-more');
-			m.click(function() { c.find('li').show(); m.hide(); });
-			{# empty textfields #}
+			// implement show more
+			const c = f.find('.history-well'), m = c.find('.show-more');
+			m.click(function() { c.find('li.initially-hidden').removeClass('initially-hidden').show(); m.hide(); });
+			// empty textfields
 			c.next('textarea, input[type="text"]').val("");
-			{# implement edited notification #}
+			// implement edited notification
 			const o = f.find('.only-when-edited'), i = f.serialize();
 			let s = false;
 			f.removeAttr('id');
@@ -160,15 +181,16 @@
 				o.hide(); s = false;
 			});
 			o.hide();
-			{# inject styles #}
+			// inject styles
 			if ($('#jutut-v2').length==0)
 				$('<style id="jutut-v2"></style>').appendTo(document.head).text(
-					".jutut-exercise.jutut-v2 .well { padding: 6px; } " +
+					".jutut-exercise.jutut-v2 .history-well { padding: 6px; } " +
+					".jutut-exercise.jutut-v2 li.initially-hidden { display: none; } " +
 					".jutut-exercise.jutut-v2 .show-more { margin: 0 0 -6px; padding: 0; text-align: center; cursor: pointer; } " +
 					".jutut-exercise.jutut-v2 li { margin: 3px 0; border-radius: 4px; } " +
 					".jutut-exercise.jutut-v2 li .text { white-space: pre-wrap; } " +
-					".jutut-exercise.jutut-v2 li.staff { margin-left: 15%; padding-left: 32px; color: #333; } " +
-					".jutut-exercise.jutut-v2 li.staff .glyphicon { position: absolute; top: 12px; left: 12px; color: #5d5d5d; } " +
+					".jutut-exercise.jutut-v2 li.staff { margin-left: 15%; padding-left: 32px; color: #333; position: relative; } " +
+					".jutut-exercise.jutut-v2 li.staff .bi { position: absolute; top: 12px; left: 12px; color: #5d5d5d; } " +
 					".jutut-exercise.jutut-v2 li.student { margin-right: 15%;} " +
 					".modal-content .jutut-exercise.jutut-v2 li.student:not(:has(~ .student)) { border: solid 2px #66afe9; } "
 				);
