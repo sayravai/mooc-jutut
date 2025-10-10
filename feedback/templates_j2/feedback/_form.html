@@ -12,6 +12,23 @@
 	></span>
 {% endmacro -%}
 {#
+  Ensure input/textarea widgets get Bootstrap 5 form-control
+-#}
+{% macro render_control(field) -%}
+	{%- set w = field.field.widget -%}
+	{%- set input_type = w.input_type if w.input_type is defined else None -%}
+	{%- set is_textarea = 'Textarea' in w.__class__.__name__ -%}
+	{%- set excluded = ['checkbox','radio','file','hidden','range','submit','reset','button','image'] -%}
+	{%- set make_control = is_textarea or (input_type and (input_type not in excluded)) -%}
+	{%- if make_control -%}
+		{%- set existing = w.attrs.get('class','') -%}
+		{%- set new_class = (existing ~ (' ' if existing else '') ~ 'form-control') -%}
+		{{ field.as_widget(attrs={'class': new_class}) }}
+	{%- else -%}
+		{{ field }}
+	{%- endif -%}
+{%- endmacro -%}
+{#
   Staff reponse template
 -#}
 {% macro staff_response(message, index=0) -%}
@@ -21,19 +38,22 @@
 			<span class="text">{{ message|safe }}</span>
 		</li>
 	{% endif %}
-{% endmacro -%}
+{%- endmacro -%}
 {#
   Student message template
 -#}
 {% macro student_message(messages, f_key, index=0) -%}
-	<li class="list-group-item student{% if index > 2 %} initially-hidden{% endif %}">
-		{%- for key, text in messages -%}
-			{% if key == f_key -%}
-				<span class="text">{{ text }}</span>
-			{%- endif %}
-		{%- endfor -%}
-	</li>
-{% endmacro -%}
+	{# messages is a list of (key, text) tuples per Feedback.text_feedback #}
+	{%- for pair in messages -%}
+		{%- set k = pair[0] -%}
+		{%- set val = pair[1] -%}
+		{%- if k == f_key and val -%}
+			<li class="list-group-item student{% if index > 2 %} initially-hidden{% endif %}">
+				<span class="text">{{ val|safe }}</span>
+			</li>
+		{%- endif -%}
+	{%- endfor -%}
+{%- endmacro -%}
 {% macro well(older_count, show_teacher=true, f_key=none) -%}
 	{%- if show_teacher -%}
 		{% set sr_text = _("Previous responses and teacher replies") %}
@@ -70,15 +90,16 @@
 {#
 	Generic field renderer for Bootstrap 5 (replaces |bootstrap and |bootstrap_classes filters from django-bootstrap-form)
 -#}
+
 {% macro render_field(field) -%}
 	<div class="mb-3">
 		{%- if field.auto_id and field.label -%}
 			<label class="form-label {% if field.field.required %}{{ form.required_css_class or 'required' }}{% endif %}" for="{{ field.auto_id }}">{{ field.label }}</label>
 		{%- endif -%}
-		{{ field }}
 		{%- if field.help_text -%}
 			<div class="form-text">{{ field.help_text|safe }}</div>
 		{%- endif -%}
+		{{ render_control(field) }}
 		{%- for error in field.errors -%}
 			<div class="invalid-feedback d-block">{{ error }}</div>
 		{%- endfor -%}
@@ -117,7 +138,7 @@
 								{%- endif -%}
 								{#- Old versions and teacher responses (if main text feedback) -#}
 								{{ well(older_count, field is primary_textfeedback, field.name) }}
-								{{ field }}
+								{{ render_control(field) }}
 								{%- for error in field.errors -%}
 									<div class="invalid-feedback d-block">{{ error }}</div>
 								{%- endfor -%}
@@ -184,7 +205,7 @@
 			// inject styles
 			if ($('#jutut-v2').length==0)
 				$('<style id="jutut-v2"></style>').appendTo(document.head).text(
-					".jutut-exercise.jutut-v2 . { padding: 6px; } " +
+					".jutut-exercise.jutut-v2 .history-well { padding: 6px; } " +
 					".jutut-exercise.jutut-v2 li.initially-hidden { display: none; } " +
 					".jutut-exercise.jutut-v2 .show-more { margin: 0 0 -6px; padding: 0; text-align: center; cursor: pointer; } " +
 					".jutut-exercise.jutut-v2 li { margin: 3px 0; border-radius: 4px; } " +
