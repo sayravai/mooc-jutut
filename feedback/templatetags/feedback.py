@@ -78,3 +78,61 @@ def on_state(cur_state, on_state='default'):
 @register.filter
 def studenttags_for_course(user, course):
     return user.tags.all().filter(course=course).order_by('name')
+
+
+@register.filter(name="add_bs_class")
+def add_bs_class(field, css):
+    """
+    Safely add CSS classes to a Django form field widget from a template.
+    Usage: {{ field|add_bs_class:'form-control' }}
+    If the widget already has class(es), append to them.
+    """
+    w = field.field.widget
+    existing = w.attrs.get('class', '')
+    existing_parts = [c for c in existing.split() if c]
+    new_parts = [c for c in str(css).split() if c]
+    merged = existing_parts[:]
+    for c in new_parts:
+        if c not in merged:
+            merged.append(c)
+    return field.as_widget(attrs={'class': ' '.join(merged)})
+
+
+@register.filter(name="as_bs_field")
+def as_bs_field(field):
+    """Render a form field with appropriate Bootstrap 5 class based on widget type.
+    - Text-like inputs and Textarea => form-control
+    - Select / SelectMultiple => form-select
+    - Checkbox/Radio/Files/Hidden/Range and group widgets => unchanged
+    """
+    from django.forms.widgets import (
+        Select,
+        SelectMultiple,
+        Textarea,
+        CheckboxInput,
+        RadioSelect,
+        CheckboxSelectMultiple,
+        FileInput,
+    HiddenInput,
+    )
+
+    w = field.field.widget
+
+    # Group/boolean and non-text widgets we don't decorate here
+    if isinstance(w, (RadioSelect, CheckboxSelectMultiple, CheckboxInput, FileInput, HiddenInput)):
+        return field
+
+    # Dropdowns
+    if isinstance(w, (Select, SelectMultiple)):
+        return add_bs_class(field, 'form-select')
+
+    # Multiline text
+    if isinstance(w, Textarea):
+        return add_bs_class(field, 'form-control')
+
+    # Generic input widgets (text, number, email, etc.)
+    if getattr(w, 'input_type', None):
+        return add_bs_class(field, 'form-control')
+
+    # Fallback: leave as-is
+    return field

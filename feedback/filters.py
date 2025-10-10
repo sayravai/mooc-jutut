@@ -119,7 +119,7 @@ class SegmentedSelect(forms.RadioSelect):
     option_template_name = "feedback/widgets/segmented_option.html"
 
     def __init__(self, attrs=None, choices=()):
-        add_classes = "btn-group btn-group-sm"
+        add_classes = "btn-group btn-group-sm w-100"
         if not attrs:
             attrs = {
                 "class": add_classes,

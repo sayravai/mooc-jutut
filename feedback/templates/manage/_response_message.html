@@ -18,7 +18,7 @@
 	{% if feedback.max_grade %}
 		{% with grade=form.had.response_grade_text color=form.had.valid_response_grade|grade_color %}
 		<span
-			class="feedback-status-label label reacts-to-status label-{{ color }}"
+			class="feedback-status-label badge reacts-to-status text-bg-{{ color }}"
 			>{{ grade }}</span>
 		{% endwith %}
 	{% else %}
@@ -140,14 +140,14 @@
 						data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="bottom"
 						title="{% translate 'Preview' %}"
 					>
-						<span class="bi bi-eye-open" aria-label="{% translate 'Preview' %}"></span>
+						<span class="bi bi-eye-fill" aria-label="{% translate 'Preview' %}"></span>
 					</button>
 					<button type="button" class="unpreview-button btn btn-secondary btn-sm"
 						style="display: none;"
 						data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="bottom"
 						title="{% translate 'Hide preview' %}"
 					>
-						<span class="bi bi-edit" aria-label="{% translate 'Hide preview and return to editing' %}"></span>
+						<span class="bi bi-eye-slash-fill" aria-label="{% translate 'Hide preview and return to editing' %}"></span>
 					</button>
 				</div>
 				<div class="btn-group visible-xs-response">
@@ -164,28 +164,28 @@
 						data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-html="true"
 						title="{% translate 'Insert link' %}<br>(CTRL/⌘ + K)"
 					>
-						<span class="bi bi-link" aria-label="{% translate 'Insert link' %}"></span>
+						<span class="bi bi-link-45deg" aria-label="{% translate 'Insert link' %}"></span>
 					</button>
 					<button type="button" class="btn btn-secondary btn-sm"
 						data-tag="b"
 						data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-html="true"
 						title="{% translate 'Bold' %}<br>(CTRL/⌘ + B)"
 					>
-						<span class="bi bi-bold" aria-label="{% translate 'Bold' %}"></span>
+						<span class="bi bi-type-bold" aria-label="{% translate 'Bold' %}"></span>
 					</button>
 					<button type="button" class="btn btn-secondary btn-sm"
 						data-tag="i"
 						data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-html="true"
 						title="{% translate 'Italic' %}<br>(CTRL/⌘ + I)"
 					>
-						<span class="bi bi-italic" aria-label="{% translate 'Italic' %}"></span>
+						<span class="bi bi-type-italic" aria-label="{% translate 'Italic' %}"></span>
 					</button>
 					<button type="button" class="btn btn-secondary btn-sm"
 						data-tag="code"
 						data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="bottom"
 						title="{% translate 'Monospace/code' %}"
 					>
-						<span class="bi bi-font" aria-label="{% translate 'Monospace/code' %}"></span>
+						<span class="bi bi-fonts" aria-label="{% translate 'Monospace/code' %}"></span>
 					</button>
 				</div>
 			</div>
