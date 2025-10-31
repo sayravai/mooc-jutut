@@ -1,5 +1,5 @@
 body {
-	padding-top: 50px;
+	padding-top: 70px;
 	padding-bottom: 30px;
 }
 
@@ -110,7 +110,7 @@ input[type="checkbox"].combosearch + label {
 @media (min-width: 750px) {
 	#filter-container {
 		display: grid;
-		grid-template-columns: min(max(300px, 40%), 450px) 1fr;
+		grid-template-columns: min(max(400px, 50%), 550px) 1fr;
 		column-gap: 3em;
 	}
 	#general-filter-pane {
@@ -353,6 +353,7 @@ input[type="checkbox"].combosearch + label {
 }
 .conversation-panel > .panel-heading .panel-title {
 	font-size: 13px;
+	padding-right: 0.5em;
 }
 .conversation-panel > .panel-heading .hover-btn {
 	color: #000;
@@ -382,7 +383,7 @@ input[type="checkbox"].combosearch + label {
 	background-color: #f7f7f7;
 	min-height: 1.5em;
 	position: relative; /* for positioning timestamp */
-	padding-bottom: 0.4em;
+	padding-top: 0.2em;
 }
 .response-message-container {
 	width: auto;
@@ -428,6 +429,7 @@ body.ios .feedback-message tr .bi {
 	align-items: center;
 	padding: 0.2em;
 	cursor: pointer;
+	background-color: #f5f5f5;
 }
 .feedback-message > .panel-footer.collapsed {
 	background: transparent;
@@ -689,34 +691,4 @@ body.ios .feedback-message tr .bi {
 
 #tag-import-preview-container .not-importable {
 	opacity: 0.4;
-}
-
-/* spin animation, src: http://bootsnipp.com/snippets/featured/glyphicon-animate-rotation-and-flip */
-.gly-spin {
-	-webkit-animation: spin 2s infinite linear;
-	-moz-animation: spin 2s infinite linear;
-	-o-animation: spin 2s infinite linear;
-	animation: spin 2s infinite linear;
-}
-@-moz-keyframes spin {
-	0% {   -moz-transform: rotate(0deg); }
-	100% { -moz-transform: rotate(359deg); }
-}
-@-webkit-keyframes spin {
-	0% {   -webkit-transform: rotate(0deg); }
-	100% { -webkit-transform: rotate(359deg); }
-}
-@-o-keyframes spin {
-	0% {   -o-transform: rotate(0deg); }
-	100% { -o-transform: rotate(359deg); }
-}
-@keyframes spin {
-	0% {
-		-webkit-transform: rotate(0deg);
-		transform: rotate(0deg);
-	}
-	100% {
-		-webkit-transform: rotate(359deg);
-		transform: rotate(359deg);
-	}
 }

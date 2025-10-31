@@ -3,18 +3,30 @@ $(function() {
   /* append error notification */
   function append_error_info(selection, msg, klass=null) {
     selection.each(function() {
-      var icon = $('<span class="' + (klass||'') + ' label label-danger"><span class="bi bi-alert"></span></span>');
-      icon.tooltip({ title: msg });
+      var icon = $('<span class="' + (klass||'') + ' badge text-bg-danger"><span class="bi bi-alert"></span></span>');
       $(this).append(icon);
+      let tt;
+      try { tt = bootstrap.Tooltip.getOrCreateInstance(icon[0], { title: msg }); } catch(_) {}
+      // Auto-remove error badge after a short delay and dispose tooltip to avoid leaks
+      setTimeout(function() {
+        if (tt) { try { tt.dispose(); } catch(_) {} }
+        icon.remove();
+      }, 5000);
     });
   }
 
   /* append done notification */
   function append_done_info(selection, msg, klass=null) {
     selection.each(function() {
-      var icon = $('<span class="' + (klass||'') + ' label label-success"><span class="bi bi-ok "></span></span>');
-      icon.tooltip({ title: msg });
+      var icon = $('<span class="' + (klass||'') + ' badge text-bg-success"><span class="bi bi-ok "></span></span>');
       $(this).append(icon);
+      let tt;
+      try { tt = bootstrap.Tooltip.getOrCreateInstance(icon[0], { title: msg }); } catch(_) {}
+      // Auto-remove success badge sooner and dispose tooltip
+      setTimeout(function() {
+        if (tt) { try { tt.dispose(); } catch(_) {} }
+        icon.remove();
+      }, 2000);
     });
   }
 
@@ -25,7 +37,7 @@ $(function() {
 
   /* add status tag to response form */
   function add_status_tag(panel, text, color) {
-    var html = '<span class="status-tag label label-' + color + ' pull-right">' + text + '</span>';
+    var html = '<span class="status-tag badge text-bg-' + color + ' float-end">' + text + '</span>';
     panel.find(".status-tag-container").append(html);
   }
 
@@ -369,7 +381,7 @@ $(function() {
     var defer = container.data('rlock') || $.when();
     // connect to defer chain
     container.data('rlock', defer.then(function() {
-      var spinner = $('<span class="updating bi bi-refresh gly-spin"></span>');
+      var spinner = $('<span class="updating spinner-border spinner-border-sm"></span>');
       container.find('.uploadok, .'+errorname).remove(); // clear old done and error notifications
       container.append(spinner); // add spinner
       var promise = $.Deferred(); // this promise is fulfilled when ajax request is completed, thus we get serialized updates per response
@@ -421,7 +433,11 @@ $(function() {
           elem = $(data);
           self.replaceWith(elem);
           // new data, do reactions
-          !nohover && elem.filter('[data-bs-toggle="tooltip"]').tooltip();
+          if (!nohover) {
+            elem.filter('[data-bs-toggle="tooltip"]').each(function() {
+              try { bootstrap.Tooltip.getOrCreateInstance(this); } catch(_) {}
+            });
+          }
           // remember updateurl
           if (!elem.data('updateurl'))
             elem.data('updateurl', url);
@@ -465,18 +481,9 @@ $(function() {
     dom.find('.replace-with-buttons').each(replace_with_buttons);
     if (!nohover) {
       // Safe tooltip init: avoid creating multiple instances on same element
-      // Skip elements that also declare a popover (Bootstrap doesn't support both on one element)
-      dom.find('[data-bs-toggle="tooltip"]').not('[data-bs-toggle="popover"]').each(function() {
-        if (window.bootstrap && bootstrap.Tooltip) {
-          if (!bootstrap.Tooltip.getInstance(this)) {
-            try { new bootstrap.Tooltip(this); } catch(_) {}
-          }
-        } else {
-          // Fallback for older plugin style if still present
-            if (!$(this).data('bs.tooltip')) {
-              try { $(this).tooltip(); } catch(_) {}
-            }
-        }
+      // Skip elements that also declare a popover and styling toggles we convert to Popover
+      dom.find('[data-bs-toggle="tooltip"]').not('[data-bs-toggle="popover"]').not('.toggle-styling-buttons').each(function() {
+        try { bootstrap.Tooltip.getOrCreateInstance(this); } catch(_) {}
       });
     }
     dom.find('.feedback-status-label').each(update_feedback_status_colors);
@@ -498,30 +505,21 @@ $(function() {
 
     // enable showing styling buttons on click when they don't fit
     dom.find('.toggle-styling-buttons').each((i, elem) => {
-      const btn = $(elem);
-      btn.popover({
-        'trigger': 'click',
-        'content': () => {
-          return btn.closest('.btn-toolbar').find('.styling-buttons').clone(true);
-        },
-        'template': '<div class="popover style-buttons" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>',
-      })
-      btn.on('show.bs.popover', () => {
-        if (window.bootstrap && bootstrap.Tooltip) {
-          const inst = bootstrap.Tooltip.getInstance(btn[0]);
-          if (inst) { inst.hide(); inst.disable(); }
-        } else {
-          try { btn.tooltip('hide').tooltip('disable'); } catch(_) {}
-        }
+      const $btn = $(elem);
+      const contentFn = () => $btn.closest('.btn-toolbar').find('.styling-buttons').clone(true)[0];
+      // Ensure no Tooltip remains on this element before creating a Popover
+      const tt = bootstrap.Tooltip.getInstance(elem);
+      if (tt) try { tt.dispose(); } catch(_) {}
+      const pop = bootstrap.Popover.getOrCreateInstance(elem, {
+        trigger: 'click',
+        content: contentFn,
+        template: '<div class="popover style-buttons" role="tooltip"><div class="popover-arrow"></div><div class="popover-body"></div></div>',
       });
-      btn.on('hide.bs.popover', () => {
-        if (window.bootstrap && bootstrap.Tooltip) {
-          const inst = bootstrap.Tooltip.getInstance(btn[0]);
-          if (inst) inst.enable();
-        } else {
-          try { btn.tooltip('enable'); } catch(_) {}
-        }
+      $btn.on('show.bs.popover', () => {
+        const inst = bootstrap.Tooltip.getInstance(elem);
+        if (inst) { try { inst.dispose(); } catch(_) {} }
       });
+      // Do not re-enable tooltip after hide; these controls use popover only
     })
 
     // timeouts
@@ -578,12 +576,15 @@ function toggleShowAll(event) {
 window.addEventListener("load", (event) => {
 
   /* Set up zen mode checkbox (persist state on reload) */
-  if (localStorage.getItem('zenMode') == "true") {
-    document.getElementById("zen-mode-cb").checked = true;
+  const zenModeCb = document.getElementById("zen-mode-cb");
+  if (zenModeCb) {
+    if (localStorage.getItem('zenMode') == "true") {
+      zenModeCb.checked = true;
+    }
+    zenModeCb.addEventListener('change', (e) => {
+      localStorage.setItem('zenMode', e.target.checked);
+    });
   }
-  document.getElementById("zen-mode-cb").addEventListener('change', (e) => {
-    localStorage.setItem('zenMode', e.target.checked);
-  });
 
   /* Set up showall buttons */
   const showallDivs = document.getElementsByClassName("toggle-showall");
@@ -595,32 +596,47 @@ window.addEventListener("load", (event) => {
 });
 
 async function copyToClipboard(text, elem) {
-  const popoverOpts = {
-    template: '<div class="popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>',
-    trigger: 'manual',
+  const popoverOpts = { trigger: 'manual', container: 'body', placement: 'bottom' };
+  if (!elem) return;
+  // Ensure tooltip never shows during click/notification; fully dispose to avoid Popover-vs-Tooltip conflict
+  let tooltipInst = bootstrap.Tooltip.getInstance(elem);
+  if (tooltipInst) { try { tooltipInst.dispose(); } catch(_) {} }
+  const originalTitle = elem.getAttribute('title') || '';
+  // Prevent popover from using the title as a header
+  elem.setAttribute('title', '');
+  elem.removeAttribute('data-bs-original-title');
+
+  const okMsg = elem.dataset.copyNotification ? elem.dataset.copyNotification : 'Copied to clipboard';
+  const errMsg = 'Unable to copy to clipboard: ' + text;
+
+  const showPopover = (content) => {
+    let popInst = bootstrap.Popover.getInstance(elem);
+    if (popInst) { try { popInst.dispose(); } catch(_) {} }
+    popInst = new bootstrap.Popover(elem, {
+      ...popoverOpts,
+      content,
+      template: '<div class="popover" role="tooltip"><div class="popover-arrow"></div><div class="popover-body"></div></div>',
+    });
+    try { popInst.show(); } catch(_) {}
   };
+  const hidePopoverLater = (ms) => {
+    setTimeout(() => {
+      const inst = bootstrap.Popover.getInstance(elem);
+      if (inst) { try { inst.dispose(); } catch(_) {} }
+      // Restore original title and recreate tooltip for future hovers
+      if (originalTitle) elem.setAttribute('title', originalTitle);
+      try { bootstrap.Tooltip.getOrCreateInstance(elem); } catch(_) {}
+    }, ms);
+  };
+
   try {
     await navigator.clipboard.writeText(text);
-    if (elem) {
-      btn = $(elem);
-      btn.tooltip('hide').popover({
-        ...popoverOpts,
-        content: elem.dataset.copyNotification || "'" + text + "' was copied to the clipboard",
-      }).popover('show');
-      setTimeout(() => { btn.popover('hide'); }, 2000);
-    }
+    showPopover(okMsg);
+    hidePopoverLater(2000); // success: 2 seconds
   } catch (error) {
-    console.error(error.message);
-    if (elem) {
-      btn = $(elem);
-      btn.tooltip('hide').popover({
-        ...popoverOpts,
-        content: "Unable to copy to clipboard: " + text,
-      }).popover('show');
-      setTimeout(() => { btn.popover('hide'); }, 5000);
-    } else {
-      console.log("Unable to copy to clipboard: " + text);
-    }
+    console.error(error && error.message ? error.message : error);
+    showPopover(errMsg);
+    hidePopoverLater(5000); // error: keep visible longer
   }
 }
 
@@ -698,7 +714,7 @@ async function fetchBtnUrlContent(btn, errorClass) {
 $(function() {
   // Initialize any static popovers declared via data attributes (Bootstrap 5 only)
   document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
-    if (!bootstrap.Popover.getInstance(el)) new bootstrap.Popover(el);
+    bootstrap.Popover.getOrCreateInstance(el);
   });
 
   const opts = {

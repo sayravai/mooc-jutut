@@ -80,7 +80,7 @@ def studenttags_for_course(user, course):
     return user.tags.all().filter(course=course).order_by('name')
 
 
-@register.filter(name="add_bs_class")
+@register.filter(name="add_bs_class", is_safe=True)
 def add_bs_class(field, css):
     """
     Safely add CSS classes to a Django form field widget from a template.
@@ -98,41 +98,59 @@ def add_bs_class(field, css):
     return field.as_widget(attrs={'class': ' '.join(merged)})
 
 
-@register.filter(name="as_bs_field")
+@register.filter(name="as_bs_field", is_safe=True)
 def as_bs_field(field):
     """Render a form field with appropriate Bootstrap 5 class based on widget type.
     - Text-like inputs and Textarea => form-control
     - Select / SelectMultiple => form-select
-    - Checkbox/Radio/Files/Hidden/Range and group widgets => unchanged
+    - Date/DateTime/Time inputs => form-control
+    - Checkbox/Radio/Files/Hidden and group widgets => unchanged
     """
     from django.forms.widgets import (
+        Input,
         Select,
         SelectMultiple,
         Textarea,
+        DateInput,
+        DateTimeInput,
+        TimeInput,
+        SelectDateWidget,
         CheckboxInput,
         RadioSelect,
         CheckboxSelectMultiple,
         FileInput,
-    HiddenInput,
+        HiddenInput,
     )
 
     w = field.field.widget
 
-    # Group/boolean and non-text widgets we don't decorate here
-    if isinstance(w, (RadioSelect, CheckboxSelectMultiple, CheckboxInput, FileInput, HiddenInput)):
-        return field
+    # Group/boolean and hidden widgets: render as-is (no class changes here)
+    if isinstance(w, (RadioSelect, CheckboxSelectMultiple, CheckboxInput, HiddenInput)):
+        return field.as_widget()
 
     # Dropdowns
     if isinstance(w, (Select, SelectMultiple)):
         return add_bs_class(field, 'form-select')
 
+    # Composite date widget
+    if isinstance(w, SelectDateWidget):
+        return add_bs_class(field, 'form-select')
+
+    # File inputs in Bootstrap 5 also use form-control
+    if isinstance(w, FileInput):
+        return add_bs_class(field, 'form-control')
+
     # Multiline text
     if isinstance(w, Textarea):
         return add_bs_class(field, 'form-control')
 
-    # Generic input widgets (text, number, email, etc.)
-    if getattr(w, 'input_type', None):
+    # Date/Time inputs
+    if isinstance(w, (DateInput, DateTimeInput, TimeInput)):
         return add_bs_class(field, 'form-control')
 
-    # Fallback: leave as-is
-    return field
+    # Generic input widgets (text, number, email, url, etc.)
+    if isinstance(w, Input) or getattr(w, 'input_type', None):
+        return add_bs_class(field, 'form-control')
+
+    # Fallback: render as-is
+    return field.as_widget()
