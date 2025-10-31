@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load static %}
 
 {% block styles %}
 	{{ super() }}
@@ -15,7 +14,7 @@
 		integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" 
 		crossorigin="anonymous">
 	{# chosen #}
-	<link rel="stylesheet" href="{% static "chosen-bs5.css" %}">
+	<link rel="stylesheet" href="{{ static('chosen-bs5.css') }}">
 {% endblock styles %}
 
 {% block scripts %}
