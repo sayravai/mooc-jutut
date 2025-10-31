@@ -3,7 +3,7 @@ $(function() {
   /* append error notification */
   function append_error_info(selection, msg, klass=null) {
     selection.each(function() {
-      var icon = $('<span class="' + (klass||'') + ' badge text-bg-danger"><span class="bi bi-alert"></span></span>');
+      var icon = $('<span class="' + (klass||'') + ' badge text-bg-danger"><span class="bi bi-exclamation-triangle"></span></span>');
       $(this).append(icon);
       let tt;
       try { tt = bootstrap.Tooltip.getOrCreateInstance(icon[0], { title: msg }); } catch(_) {}
