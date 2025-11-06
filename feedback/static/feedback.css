@@ -338,8 +338,8 @@ input[type="checkbox"].combosearch + label {
 		display: block;
 	}
 	body:has( #zen-mode-cb:checked) .conversation-tag-panel:not(:hover):not(:has( *:focus-visible)) > .colortag:not(.colortag-active) {
-		background-color: white;
-		color: white;
+		background-color: transparent;
+		color: transparent;
 		border: var(--colortag-inactive-color) 1px solid;
 	}
 }

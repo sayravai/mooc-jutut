@@ -193,11 +193,11 @@
 		<div class="response-msg-bottom-right">
 			<div class="response-label-container">
 				<span
-					class="label label-default"
+					class="badge text-bg-default"
 					{{ state|on_state:"error-conflict" }}
 					>{% trans "Conflict" %}</span>
 				<span
-					class="label label-default"
+					class="badge text-bg-default"
 					{{ state|on_state:"edit" }}
 					>{% trans "not saved" %}</span>
 				<button
@@ -207,7 +207,7 @@
 					>{% trans "Cancel" %}</button>
 				{% if form.had.responded and not form.instance.response_by %}
 					<span
-						class="label label-info"
+						class="badge text-bg-info"
 						{{ state|on_state:"default" }}
 						rel="tooltip"
 						data-bs-toggle="tooltip"
